@@ -6,21 +6,30 @@ import json
 class LLMClient:
     """A client to interact with a language model API."""
     
-    def __init__(self):
-        USE_API = os.getenv("USE_API", "False").lower() in ("true", "1", "t")
-        if USE_API:
-            API_GET_RELEVANT_LINK_MODEL = os.getenv("API_GET_RELEVANT_LINK_MODEL", "gpt-4_mini")
-            API_GENERATE_BROCHURE_MODEL = os.getenv("API_GENERATE_BROCHURE_MODEL", "gpt-4_mini")
-                        
+    def __init__(self, get_link_relevant_model=None, generate_brochure_model=None):
+        # Determine whether to use OpenAI API or Ollama
+        use_api = os.getenv("USE_API", "False").lower() in ("true", "1", "t")
+
+        if use_api:
+            # OpenAI setup
             self.llm_client = OpenAI()
-            self.get_relevant_links_model = API_GET_RELEVANT_LINK_MODEL
-            self.generate_brochure_model = API_GENERATE_BROCHURE_MODEL
+            default_models = {
+                "get_relevant_links_model": os.getenv("API_GET_RELEVANT_LINK_MODEL", "gpt-4_mini"),
+                "generate_brochure_model": os.getenv("API_GENERATE_BROCHURE_MODEL", "gpt-4_mini"),
+            }
         else:
-            OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
-            self.ollama_base_url = OLLAMA_BASE_URL
-            self.llm_client = OpenAI(base_url=OLLAMA_BASE_URL, api_key="ollama")
-            self.get_relevant_links_model = os.getenv("OLLAMA_GET_RELEVANT_LINK_MODEL", "llama3.2")
-            self.generate_brochure_model = os.getenv("OLLAMA_GENERATE_BROCHURE_MODEL", "gpt-oss")
+            # Ollama setup
+            ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
+            self.ollama_base_url = ollama_base_url
+            self.llm_client = OpenAI(base_url=ollama_base_url, api_key="ollama")
+            default_models = {
+                "get_relevant_links_model": os.getenv("OLLAMA_GET_RELEVANT_LINK_MODEL", "llama3.2"),
+                "generate_brochure_model": os.getenv("OLLAMA_GENERATE_BROCHURE_MODEL", "gpt-oss"),
+            }
+
+        # Assign models (use provided args if given, else defaults)
+        self.get_relevant_links_model = get_link_relevant_model or default_models["get_relevant_links_model"]
+        self.generate_brochure_model = generate_brochure_model or default_models["generate_brochure_model"]
     
     def get_relevant_links(self, website):
         """Get relevant links from the website using the language model."""

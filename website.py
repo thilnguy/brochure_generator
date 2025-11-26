@@ -13,13 +13,17 @@ class Website:
         self.url = url
         try:
             response = requests.get(self.url, headers=headers)
+            soup = BeautifulSoup(response.content, "html.parser")
+            self.title = soup.title.string if soup.title else "No title found"
+            self.text = self.extract_text(soup, limit=contents_limit)
+            self.links = self.extract_links(soup)
         except requests.exceptions.RequestException as e:
-            print(f"Error fetching the URL {self.url}: {e}")
-            return None
-        soup = BeautifulSoup(response.content, "html.parser")
-        self.title = soup.title.string if soup.title else "No title found"
-        self.text = self.extract_text(soup, limit=contents_limit)
-        self.links = self.extract_links(soup)
+            print(f"Error fetching the URL {url}: {e}")
+            self.title = None
+            self.text = None
+            self.links = []
+            self.url = None
+        
 
     def extract_text(self, soup, limit=None):
         """
@@ -41,6 +45,8 @@ class Website:
         """
         Combine title and text content.
         """
+        if not self.title and not self.text:
+            return ""
         if self.title:
             return f"Webpage Title:\n{self.title}\nWebpage Contents:\n{self.text}\n\n"
         return f"Webpage Contents:\n{self.text}\n\n"
