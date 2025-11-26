@@ -29,4 +29,3 @@ class BrochureGenerator:
             content += linked_website.get_contents()
         
         return self.llm_client.generate_brochure( self.company_name, content, self.language)
-        
