@@ -69,18 +69,80 @@ class LLMClient:
     def generate_brochure(self, company_name, content, language="English"):
         """Generate a brochure for the company in the specified language."""
         
-        brochure_system_prompt = """
-        You are a skilled brochure writer. Your task is to create a compelling brochure for a company based on the provided webpage content and relevant links. Use the information to highlight the company's strengths, values, and offerings in an engaging manner.
-        The brochure should be well-structured, informative, and persuasive, aiming to attract potential customers or clients.
-        Respond in markdown format without code blocks.
-        Include sections such as Introduction, About Us, Services/Products, Careers, and Contact Information where applicable.
+        brochure_system_prompt = """You are an expert marketing copywriter and brochure designer.
+
+        Your task is to generate a **clean, professional, beautifully formatted Markdown brochure** using ONLY the information provided in the user message.
+
+        ### Global Rules
+        - Output must be **pure Markdown**, with **no code fences** and no HTML.
+        - Use proper heading hierarchy: `#`, `##`, `###`.
+        - Use bullet points for lists.
+        - Use bold formatting to highlight key ideas.
+        - Keep paragraphs short (2–4 lines maximum).
+        - Maintain clean spacing (no double blank lines).
+        - Never fabricate information beyond what’s reasonable or clearly implied.
+        - If data is missing, make **neutral** assumptions (never overly positive).
+        - The final result must look like a **real brochure** that a company would use.
+
+        ### Safety & Accuracy
+        - Do NOT invent statistical claims, certifications, or awards.
+        - You may infer general company characteristics, but keep them realistic.
+        - If something is unknown, phrase it generically (e.g., “The company focuses on delivering high-quality solutions.”).
+
+        Your output should always look polished, structured, and ready to present to a customer.
         """
+        
+
         
         brochure_user_prompt = f"""
         You are to create a brochure for {company_name}.
         Using the following webpage content and relevant links, create a compelling brochure for the company.
         Ensure the brochure is well-structured and highlights the company's strengths, values, and offerings.
         Use this information to build a short brochure of the company in {language} in beautiful markdown format without code blocks.
+        
+        ### REQUIRED MARKDOWN STYLE
+        - Use clear headings (#, ##, ###)
+        - Use bullet points
+        - Use callout blocks (note, tip) when useful
+        - Use bold for key items
+        - Use tables for specs, data, or features
+        - Start with a visually appealing header
+        - No raw HTML
+        - No inconsistent spacing
+        - Keep formatting compact and professional
+
+        ### REQUIRED STRUCTURE
+        # {company_name}
+
+        ## 📌 Overview
+        Short description of the company.
+
+        ## 🌐 Website
+        `<URL>`
+
+        ## ⭐ Key Strengths
+        - ...
+        - ...
+
+        ## 🧩 Products / Services
+        ### Product/Service Name
+        Short description.
+
+        ### Product/Service Name
+        Short description.
+
+        ## ⚙️ Technology / Innovation
+        - ...
+
+        ## 🤝 Contact & Social Links
+        - Website
+        - GitHub (if any)
+        - Twitter (if any)
+        - LinkedIn (if any)
+
+        ---
+
+        Always output **pure Markdown only**.
         """
         brochure_user_prompt += content[:5000]
         
